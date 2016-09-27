@@ -44,7 +44,7 @@ $mameDat.datafile.machine | foreach {
 	$fullRomPath = $mameRomDir + $_.Name + $mameRomExtension
 	
 	if (($_.cloneof) -and $excludeClones)            {$processThisGame = $false}
-	if (!($_.driver.status -eq "Good"))              {$processThisGame = $false}
+	if ($_.driver.status -ne "Good")                 {$processThisGame = $false}
 	if ($_.description -like "*Player's Edge Plus*") {$processThisGame = $false}
 	if ($_.year -lt $minYear)                        {$processThisGame = $false}
 	if ($_.year -gt $maxYear)                        {$processThisGame = $false}
