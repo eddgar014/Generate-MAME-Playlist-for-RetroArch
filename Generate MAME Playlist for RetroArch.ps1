@@ -70,7 +70,7 @@ $mameDat.datafile.machine | foreach {
 	}
 }
 
-$mameDat = $null
+remove-variable mameDat
 
 if ($x -eq 0) {
 	write-host " -=ERROR=-  No ROMs found"
@@ -85,7 +85,7 @@ write-host ""
 
 $fullPlaylist | out-file $playlistOutputFile -encoding utf8
 
-$fullPlaylist = $null
+remove-variable fullPlaylist
 
 write-host "Finished."
 write-host ""
