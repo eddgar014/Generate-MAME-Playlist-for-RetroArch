@@ -70,6 +70,8 @@ $mameDat.datafile.machine | foreach {
 	}
 }
 
+$mameDat = $null
+
 if ($x -eq 0) {
 	write-host " -=ERROR=-  No ROMs found"
 	write-host ""
@@ -82,6 +84,8 @@ write-host "Writing data to playlist file: `"$playlistOutputFile`""
 write-host ""
 
 $fullPlaylist | out-file $playlistOutputFile -encoding utf8
+
+$fullPlaylist = $null
 
 write-host "Finished."
 write-host ""
