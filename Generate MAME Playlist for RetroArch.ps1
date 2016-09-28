@@ -13,7 +13,7 @@ $mameRomDir = 'Z:\ROMs\MAME ROMs [TorrentZipped-Split]\'
 $databaseInputFile = '.\MAME 177 Full.dat'
 $playlistOutputFile = '.\MAME.lpl'
 
-# Some optional criteria which will results in more or less ROMs being added to the playlist
+# Some optional criteria which results in more or less ROMs being added to the playlist
 $minYear = "1988"
 $maxYear = "1998"
 $checkIfRomsExist = $true
@@ -30,7 +30,7 @@ if (!(test-path -literalpath $databaseInputFile)) {
 write-host ""
 write-host "Loading XML data from file: `"$databaseInputFile`""
 write-host ""
-$mameDat = [xml] (get-content $databaseInputFile)
+$mameDat = [xml] (get-content $databaseInputFile -readcount 0)
 
 write-host "Processing ROMs..."
 write-host ""
