@@ -14,7 +14,7 @@ $databaseInputFile = '.\MAME 177 Full.dat'
 $playlistOutputFile = '.\MAME.lpl'
 
 # Some optional criteria which results in more or less ROMs being added to the playlist
-$minYear = "1988"
+$minYear = "1977"
 $maxYear = "1998"
 $checkIfRomsExist = $true
 $excludeClones = $true
@@ -38,7 +38,7 @@ write-host ""
 $x = 0
 $fullPlaylist = $null
 
-$mameDat.datafile.machine | foreach {
+$mameDat.ChildNodes.ChildNodes | foreach {
 	
 	$processThisGame = $true
 	$fullRomPath = $mameRomDir + $_.Name + $mameRomExtension
