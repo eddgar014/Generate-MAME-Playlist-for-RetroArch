@@ -14,7 +14,7 @@ $databaseInputFile = '.\MAME 177 Full.dat'
 $playlistOutputFile = '.\MAME.lpl'
 
 # Some optional criteria which results in more or less ROMs being added to the playlist
-$minYear = "1977"
+$minYear = "1988"
 $maxYear = "1998"
 $checkIfRomsExist = $true
 $excludeClones = $true
