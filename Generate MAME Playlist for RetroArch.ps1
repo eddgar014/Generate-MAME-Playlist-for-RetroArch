@@ -9,12 +9,12 @@
 
 # Supply info as appropriate to your collection
 $mameRomExtension = '.zip'
-$mameRomDir = 'Z:\ROMs\MAME ROMs [TorrentZipped-Split]\'
-$databaseInputFile = '.\MAME 177 Full.dat'
+$mameRomDir = 'Z:\ROMs\MAME [TorrentZipped-Split]\'
+$databaseInputFile = '.\MAME 0.178.dat'
 $playlistOutputFile = '.\MAME.lpl'
 
 # Some optional criteria which results in more or less ROMs being added to the playlist
-$minYear = "1988"
+$minYear = "1985"
 $maxYear = "1998"
 $checkIfRomsExist = $true
 $excludeClones = $true
@@ -46,6 +46,7 @@ $mameDat.ChildNodes.ChildNodes | foreach {
 	if (($_.cloneof) -and $excludeClones)            {$processThisGame = $false}
 	if ($_.driver.status -ne "Good")                 {$processThisGame = $false}
 	if ($_.description -like "*Player's Edge Plus*") {$processThisGame = $false}
+	if ($_.description -like "*PlayChoice*")         {$processThisGame = $false}
 	if ($_.year -lt $minYear)                        {$processThisGame = $false}
 	if ($_.year -gt $maxYear)                        {$processThisGame = $false}
 	
