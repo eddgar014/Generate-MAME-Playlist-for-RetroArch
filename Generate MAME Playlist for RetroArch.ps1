@@ -16,7 +16,7 @@ $playlistOutputFile = '.\MAME.lpl'
 # Some optional criteria which results in more or less ROMs being added to the playlist
 $minYear = "1955"
 $maxYear = "1998"
-$checkIfRomsExist = $true
+$checkIfRomsExist = $false
 $excludeClones = $true
 $writePlaylist = $true
 $writeBiosList = $false
@@ -50,7 +50,8 @@ $mameDat.ChildNodes.ChildNodes | foreach {
 	if ($_.year -lt $minYear)                        {$processThisGame = $false}
 	if ($_.year -gt $maxYear)                        {$processThisGame = $false}
 	if (($_.cloneof) -and $excludeClones)            {$processThisGame = $false}
-	if ($_.driver.status -ne "Good")                 {$processThisGame = $false}
+	if ($_.driver.status -eq "imperfect")            {$processThisGame = $false}
+	if ($_.driver.status -eq "preliminary")          {$processThisGame = $false}
 	if ($_.runnable -eq "no")                        {$processThisGame = $false}
 	if ($_.isdevice -eq "yes")                       {$processThisGame = $false}
 	
