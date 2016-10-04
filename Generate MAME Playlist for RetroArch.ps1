@@ -14,10 +14,13 @@ $databaseInputFile = '.\MAME 0.178.dat'
 $playlistOutputFile = '.\MAME.lpl'
 
 # Some optional criteria which results in more or less ROMs being added to the playlist
-$minYear = "1985"
+$minYear = "1955"
 $maxYear = "1998"
 $checkIfRomsExist = $true
 $excludeClones = $true
+$writePlaylist = $true
+$writeBiosList = $false
+$writeGameList = $false
 
 if (!(test-path -literalpath $databaseInputFile)) {
 	write-host ""
@@ -37,18 +40,30 @@ write-host ""
 
 $x = 0
 $fullPlaylist = $null
+$biosList = $null
 
 $mameDat.ChildNodes.ChildNodes | foreach {
 	
 	$processThisGame = $true
 	$fullRomPath = $mameRomDir + $_.Name + $mameRomExtension
 	
-	if (($_.cloneof) -and $excludeClones)            {$processThisGame = $false}
-	if ($_.driver.status -ne "Good")                 {$processThisGame = $false}
-	if ($_.description -like "*Player's Edge Plus*") {$processThisGame = $false}
-	if ($_.description -like "*PlayChoice*")         {$processThisGame = $false}
 	if ($_.year -lt $minYear)                        {$processThisGame = $false}
 	if ($_.year -gt $maxYear)                        {$processThisGame = $false}
+	if (($_.cloneof) -and $excludeClones)            {$processThisGame = $false}
+	if ($_.driver.status -ne "Good")                 {$processThisGame = $false}
+	if ($_.runnable -eq "no")                        {$processThisGame = $false}
+	if ($_.isdevice -eq "yes")                       {$processThisGame = $false}
+	
+	if ($_.description -like "*Player's Edge Plus*") {$processThisGame = $false}
+	if ($_.description -like "*PlayChoice*")         {$processThisGame = $false}
+	if ($_.description -like "*Mahjong*")            {$processThisGame = $false}
+	if ($_.description -like "*Apple*")              {$processThisGame = $false}
+	if ($_.description -like "*Macintosh*")          {$processThisGame = $false}
+	if ($_.description -like "*Quiz*")               {$processThisGame = $false}
+	if ($_.description -like "*Trivia*")             {$processThisGame = $false}
+	if ($_.description -like "*FS-*")                {$processThisGame = $false}
+	if ($_.description -like "*HB-*")                {$processThisGame = $false}
+	if ($_.description -like "*MSX*")                {$processThisGame = $false}
 	
 	if ($checkIfRomsExist -and $processThisGame) {
 		if (!(test-path -literalpath $fullRomPath)) {
@@ -68,7 +83,14 @@ $mameDat.ChildNodes.ChildNodes | foreach {
 		$fullPlaylist = $fullPlaylist + $x.ToString("00000000") + "`|crc`n"
 		$fullPlaylist = $fullPlaylist + "MAME.lpl" + "`n"
 		
+		$gameList = $gameList + $_.Name + $mameRomExtension + "`n"
+		
 	}
+	
+	if ($_.isdevice -eq "yes" -or $_.runnable -eq "no") {
+		$biosList = $biosList + $_.Name + $mameRomExtension + "`n"
+	}
+	
 }
 
 remove-variable mameDat
@@ -81,12 +103,35 @@ if ($x -eq 0) {
 }
 
 write-host ""
-write-host "Writing data to playlist file: `"$playlistOutputFile`""
-write-host ""
 
-$fullPlaylist | out-file $playlistOutputFile -encoding utf8
+if ($writePlaylist) {
+	
+	write-host "Writing data to playlist file: `"$playlistOutputFile`""
+	
+	$fullPlaylist | out-file $playlistOutputFile -encoding utf8
+	
+}
+
+if ($writeBiosList) {
+	
+	write-host "Writing list of BIOS files to: `".\_BIOSList.txt`""
+	
+	$biosList | out-file .\_BIOSList.txt -encoding utf8
+	
+}
+
+if ($writeGameList) {
+	
+	write-host "Writing game ROM filenames to: `".\_GameList.txt`""
+	
+	$gameList | out-file .\_GameList.txt -encoding utf8
+	
+}
 
 remove-variable fullPlaylist
+remove-variable biosList
+remove-variable gameList
 
+write-host ""
 write-host "Finished."
 write-host ""
