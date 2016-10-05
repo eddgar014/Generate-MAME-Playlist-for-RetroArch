@@ -3,15 +3,15 @@
 #              Script: Generate MAME Playlist for RetroArch
 #              Author: singularity098
 #                Date: 2016-09-26
-#            Revision: v1.1
-#   Last Revised Date: 2016-09-30
+#            Revision: v1.2
+#   Last Revised Date: 2016-10-05
 #
 
 # Supply info as appropriate to your collection
 $mameRomExtension         = '.zip'
 $mameRomDirCurrentSystem  = 'Z:\ROMs\MAME [TorrentZipped-Split]\'
 $mameRomDirTargetSystem   = '/home/singularity098/ROMs/MAME [1955 - 1998]/'
-$mameRomDirTrimmedSet     = '.\MAME [1955 - 1998]\'
+$mameRomDirTrimmedSet     = 'Z:\ROMs\MAME [1955 - 1998]\'
 $databaseInputFile        = '.\MAME 0.178.dat'
 $playlistOutputFile       = '.\MAME.lpl'
 
@@ -19,7 +19,7 @@ $playlistOutputFile       = '.\MAME.lpl'
 $minYear = "1955"
 $maxYear = "1998"
 
-# Adds backslash to end of dir if missing
+# Adds backslash to end of dir if missing (local dirs only)
 if ($mameRomDirCurrentSystem.Substring($mameRomDirCurrentSystem.Length - 1) -ne "\") {
 	$mameRomDirCurrentSystem = $mameRomDirCurrentSystem + "\"
 }
@@ -30,11 +30,11 @@ if ($mameRomDirTrimmedSet.Substring($mameRomDirTrimmedSet.Length - 1) -ne "\") {
 clear-host
 
 write-host ""
-write-host "           =================================================="
+write-host "           ================================================"
 write-host ""
 write-host "            --=[ Generate MAME Playlist for RetroArch ]=-- "
 write-host ""
-write-host "           =================================================="
+write-host "           ================================================"
 write-host ""
 
 write-host "Currently configured variables (edit the script body if changes needed):"
@@ -53,7 +53,7 @@ function Ask-User ($question)
 {
 	$answer = read-host -prompt $question
 	
-	if (($answer -eq "y") -or ($answer -eq "Y")) {
+	if (($answer.ToUpper() -eq "Y") -or ($answer.ToUpper() -eq "YES")) {
 		return $true
 	}
 	else {
@@ -154,7 +154,7 @@ $mameDat.ChildNodes.ChildNodes | foreach {
 	if ($processThisGame) {
 	
 		$x = $x + 1
-		write-host $x.ToString("0000") `| $_.Name.PadLeft(8) `| $_.Description
+		write-host $x.ToString("0000") `| $_.Name.PadLeft(12) `| $_.Description
 		
 		$fullPlaylist = $fullPlaylist + $fullRomPath + "`n"
 		$fullPlaylist = $fullPlaylist + $_.Description + "`n"
@@ -185,7 +185,7 @@ if ($copyTrimmedRomset) {
 	if (!(test-path "$mameRomDirTrimmedSet")) {new-item "$mameRomDirTrimmedSet" -type directory | out-null}
 	
 	write-host ""
-	write-host "Copying qualified roms to trimmed directory: $mameRomDirTrimmedSet"
+	write-host "Copying qualified ROMs to trimmed directory: $mameRomDirTrimmedSet"
 	$gameList.split("`n") | foreach {if ($_ -ne "") {copy-item -literalpath $mameRomDirCurrentSystem$_ "$mameRomDirTrimmedSet" 2>&1 | out-null}}
 	write-host "Copying any BIOS files to trimmed directory: $mameRomDirTrimmedSet"
 	$biosList.split("`n") | foreach {if ($_ -ne "") {copy-item -literalpath $mameRomDirCurrentSystem$_ "$mameRomDirTrimmedSet" 2>&1 | out-null}}
@@ -202,3 +202,4 @@ write-host ""
 write-host "Finished."
 write-host ""
 
+sleep 1
