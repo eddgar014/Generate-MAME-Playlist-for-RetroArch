@@ -8,19 +8,58 @@
 #
 
 # Supply info as appropriate to your collection
-$mameRomExtension = '.zip'
-$mameRomDir = 'Z:\ROMs\MAME [TorrentZipped-Split]\'
-$databaseInputFile = '.\MAME 0.178.dat'
-$playlistOutputFile = '.\MAME.lpl'
+$mameRomExtension         = '.zip'
+$mameRomDirCurrentSystem  = 'Z:\ROMs\MAME [TorrentZipped-Split]\'
+$mameRomDirTargetSystem   = '/home/singularity098/ROMs/MAME [1955 - 1998]/'
+$mameRomDirTrimmedSet     = '.\MAME [1955 - 1998]\'
+$databaseInputFile        = '.\MAME 0.178.dat'
+$playlistOutputFile       = '.\MAME.lpl'
 
-# Some optional criteria which results in more or less ROMs being added to the playlist
+# Set minimum and maximum year for qualifying games
 $minYear = "1955"
 $maxYear = "1998"
-$checkIfRomsExist = $false
-$excludeClones = $true
-$writePlaylist = $true
-$writeBiosList = $false
-$writeGameList = $false
+
+# Adds backslash to end of dir if missing
+if ($mameRomDirCurrentSystem.Substring($mameRomDirCurrentSystem.Length - 1) -ne "\") {
+	$mameRomDirCurrentSystem = $mameRomDirCurrentSystem + "\"
+}
+if ($mameRomDirTrimmedSet.Substring($mameRomDirTrimmedSet.Length - 1) -ne "\") {
+	$mameRomDirTrimmedSet = $mameRomDirTrimmedSet + "\"
+}
+
+clear-host
+
+write-host ""
+write-host "           =================================================="
+write-host ""
+write-host "            --=[ Generate MAME Playlist for RetroArch ]=-- "
+write-host ""
+write-host "           =================================================="
+write-host ""
+
+write-host "Currently configured variables (edit the script body if changes needed):"
+write-host ""
+write-host "   MAME ROM directory (current system):"$mameRomDirCurrentSystem
+write-host "   MAME ROM directory  (target system):"$mameRomDirTargetSystem
+write-host "   MAME ROM trimmed output directory  :"$mameRomDirTrimmedSet
+write-host "                    MAME ROM extension:"$mameRomExtension
+write-host "                         MAME DAT file:"$databaseInputFile
+write-host "                    RetroArch playlist:"$playlistOutputFile
+write-host "                      Minimum ROM year:"$minYear
+write-host "                      Maximum ROM year:"$maxYear
+write-host ""
+
+function Ask-User ($question)
+{
+	$answer = read-host -prompt $question
+	
+	if (($answer -eq "y") -or ($answer -eq "Y")) {
+		return $true
+	}
+	else {
+		return $false
+	}
+}
 
 if (!(test-path -literalpath $databaseInputFile)) {
 	write-host ""
@@ -28,6 +67,34 @@ if (!(test-path -literalpath $databaseInputFile)) {
 	write-host ""
 	sleep 1
 	exit
+}
+
+if (ask-user("Exclude all clones?  y/n")) {
+	$excludeClones = $true
+}
+else {
+	$excludeClones = $false
+}
+
+if (ask-user("Check if ROM files actually exist before adding to playlist?  y/n")) {
+	$checkIfRomsExist = $true
+}
+else {
+	$checkIfRomsExist = $false
+}
+
+if (ask-user("Override directory with `"target system`" directory in the playlist?  y/n")) {
+	$overrideWithTargetSystemDir = $true
+}
+else {
+	$overrideWithTargetSystemDir = $false
+}
+
+if (ask-user("Copy all qualified ROM and BIOS files to trimmed directory ($mameRomDirTrimmedSet)?  y/n")) {
+	$copyTrimmedRomset = $true
+}
+else {
+	$copyTrimmedRomset = $false
 }
 
 write-host ""
@@ -45,7 +112,7 @@ $biosList = $null
 $mameDat.ChildNodes.ChildNodes | foreach {
 	
 	$processThisGame = $true
-	$fullRomPath = $mameRomDir + $_.Name + $mameRomExtension
+	$fullRomPath = $mameRomDirCurrentSystem + $_.Name + $mameRomExtension
 	
 	if ($_.year -lt $minYear)                        {$processThisGame = $false}
 	if ($_.year -gt $maxYear)                        {$processThisGame = $false}
@@ -66,12 +133,24 @@ $mameDat.ChildNodes.ChildNodes | foreach {
 	if ($_.description -like "*HB-*")                {$processThisGame = $false}
 	if ($_.description -like "*MSX*")                {$processThisGame = $false}
 	
+	# Check that ROM file actually exists if option was specified
 	if ($checkIfRomsExist -and $processThisGame) {
 		if (!(test-path -literalpath $fullRomPath)) {
 			$processThisGame = $false
 		}
 	}
 	
+	# Check if the ROM file is a BIOS and add to biosList if so
+	if (($_.isdevice -eq "yes" -or $_.runnable -eq "no") -and ((test-path -literalpath $fullRomPath) -or !($checkIfRomsExist))) {
+		$biosList = $biosList + $_.Name + $mameRomExtension + "`n"
+	}
+	
+	# Override the directory in the playlist if option was specified
+	if ($overrideWithTargetSystemDir) {
+		$fullRomPath = $mameRomDirTargetSystem + $_.Name + $mameRomExtension
+	}
+	
+	# Add the game to playlist if it hasn't been disqualified
 	if ($processThisGame) {
 	
 		$x = $x + 1
@@ -87,14 +166,7 @@ $mameDat.ChildNodes.ChildNodes | foreach {
 		$gameList = $gameList + $_.Name + $mameRomExtension + "`n"
 		
 	}
-	
-	if ($_.isdevice -eq "yes" -or $_.runnable -eq "no") {
-		$biosList = $biosList + $_.Name + $mameRomExtension + "`n"
-	}
-	
 }
-
-remove-variable mameDat
 
 if ($x -eq 0) {
 	write-host " -=ERROR=-  No ROMs found"
@@ -104,31 +176,24 @@ if ($x -eq 0) {
 }
 
 write-host ""
+write-host "Writing data to playlist file: `"$playlistOutputFile`""
 
-if ($writePlaylist) {
+$fullPlaylist | out-file $playlistOutputFile -encoding utf8
+
+if ($copyTrimmedRomset) {
 	
-	write-host "Writing data to playlist file: `"$playlistOutputFile`""
+	if (!(test-path "$mameRomDirTrimmedSet")) {new-item "$mameRomDirTrimmedSet" -type directory | out-null}
 	
-	$fullPlaylist | out-file $playlistOutputFile -encoding utf8
+	write-host ""
+	write-host "Copying qualified roms to trimmed directory: $mameRomDirTrimmedSet"
+	$gameList.split("`n") | foreach {if ($_ -ne "") {copy-item -literalpath $mameRomDirCurrentSystem$_ "$mameRomDirTrimmedSet" 2>&1 | out-null}}
+	write-host "Copying any BIOS files to trimmed directory: $mameRomDirTrimmedSet"
+	$biosList.split("`n") | foreach {if ($_ -ne "") {copy-item -literalpath $mameRomDirCurrentSystem$_ "$mameRomDirTrimmedSet" 2>&1 | out-null}}
 	
 }
 
-if ($writeBiosList) {
-	
-	write-host "Writing list of BIOS files to: `".\_BIOSList.txt`""
-	
-	$biosList | out-file .\_BIOSList.txt -encoding utf8
-	
-}
 
-if ($writeGameList) {
-	
-	write-host "Writing game ROM filenames to: `".\_GameList.txt`""
-	
-	$gameList | out-file .\_GameList.txt -encoding utf8
-	
-}
-
+remove-variable mameDat
 remove-variable fullPlaylist
 remove-variable biosList
 remove-variable gameList
@@ -136,3 +201,4 @@ remove-variable gameList
 write-host ""
 write-host "Finished."
 write-host ""
+
