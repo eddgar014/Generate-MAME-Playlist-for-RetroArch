@@ -3,8 +3,8 @@
 #              Script: Generate MAME Playlist for RetroArch
 #              Author: singularity098
 #                Date: 2016-09-26
-#            Revision: v1.2
-#   Last Revised Date: 2016-10-05
+#            Revision: v1.3
+#   Last Revised Date: 2017-03-18
 #
 
 # Supply info as appropriate to your collection
