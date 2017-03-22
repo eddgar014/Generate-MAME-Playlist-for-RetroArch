@@ -9,10 +9,10 @@
 
 # Supply info as appropriate to your collection
 $mameRomExtension         = '.zip'
-$mameRomDirCurrentSystem  = 'Z:\ROMs\MAME [TorrentZipped-Split]\'
-$mameRomDirTargetSystem   = '/home/singularity098/ROMs/MAME [1955 - 1998]/'
+$mameRomDirCurrentSystem  = 'Z:\ROMs\MAME\'
+$mameRomDirTargetSystem   = 'Z:\ROMs\MAME [1955 - 1998]\'
 $mameRomDirTrimmedSet     = 'Z:\ROMs\MAME [1955 - 1998]\'
-$databaseInputFile        = '.\MAME 0.178.dat'
+$databaseInputFile        = '.\trimmed_dat.xml'
 $playlistOutputFile       = '.\MAME.lpl'
 
 # Set minimum and maximum year for qualifying games
@@ -116,7 +116,7 @@ $mameDat.ChildNodes.ChildNodes | foreach {
 	
 	if ($_.year -lt $minYear)                        {$processThisGame = $false}
 	if ($_.year -gt $maxYear)                        {$processThisGame = $false}
-	if (($_.cloneof) -and $excludeClones)            {$processThisGame = $false
+	if (($_.cloneof) -and $excludeClones)            {$processThisGame = $false}
 	if ($_.driver.status -eq "preliminary")          {$processThisGame = $false}
 	if ($_.runnable -eq "no")                        {$processThisGame = $false}
 	if ($_.isdevice -eq "yes")                       {$processThisGame = $false}
